@@ -1,2 +1,3 @@
+.cache/
 *.o
 my_server

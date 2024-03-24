@@ -37,24 +37,25 @@
 int bind_and_listen(my_server_t *server, int port, char const *ip)
 {
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    my_connection_t conn;
 
     if (socket_fd < 0) {
         perror("socket failed");
         return 1;
     }
-    server->addr = malloc(sizeof(struct sockaddr_in));
-    server->addr->sin_family = AF_INET;
-    server->addr->sin_port = htons(port);
-    inet_pton(AF_INET, ip, &(server->addr->sin_addr));
-    server->fd = socket_fd;
-    if (bind(server->fd, (struct sockaddr *)server->addr, sizeof(*(server->addr))) < 0) {
+    conn.addr.sin_family = AF_INET;
+    conn.addr.sin_port = htons(port);
+    inet_pton(AF_INET, ip, &(conn.addr.sin_addr));
+    conn.fd = socket_fd;
+    if (bind(conn.fd, (struct sockaddr *)&(conn.addr), sizeof(conn.addr)) < 0) {
         perror("bind failed");
         return 1;
     }
-    if (listen(server->fd, 10) < 0) {
+    if (listen(conn.fd, 10) < 0) {
         perror("listen failed");
         return 1;
     }
+    server->conn = conn;
     return 0;
 }
 
@@ -68,13 +69,11 @@ int cleanup_server(my_server_t *server)
 {
     if (!server)
         return 0;
-    if (close(server->fd) < 0) {
+    if (close(server->conn.fd) < 0) {
         perror("close failed");
         return 1;
     }
-    if (server->addr) {
-        free(server->addr);
-    }
+    // TODO destroy all connections
     free(server);
     return 0;
 }
@@ -89,7 +88,7 @@ my_server_t *init_server(void)
 {
     my_server_t *server = malloc(sizeof(my_server_t));
 
-    server->addr = NULL;
-    server->fd = -1;
+    reset_connection(&(server->conn));
+    server->clients = NULL;
     return server;
 }

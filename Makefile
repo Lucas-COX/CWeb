@@ -5,6 +5,7 @@ CC	= gcc
 RM	= rm -f
 
 SRCS	= ./src/connection.c \
+		  ./src/client.c \
 		  ./src/main.c \
 		  ./src/server.c \
 		  ./src/signal.c
