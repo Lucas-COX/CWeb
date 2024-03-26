@@ -12,20 +12,35 @@ SRCS	= ./src/connection.c \
 
 OBJS	= $(SRCS:.c=.o)
 
-CFLAGS = -I ./include/
+CFLAGS += -I ./include/
+CFLAGS += -I ./lib/
 CFLAGS += -Wall -Wextra
+CFLAGS += -g3
 
-all: $(NAME)
+LDFLAGS += -Wl,-rpath=./lib/
+LDFLAGS += -L./lib/
+LDFLAGS += -lllist
+
+all: libs $(NAME)
 
 $(NAME): $(OBJS)
 	 $(CC) $(OBJS) -o $(NAME) $(LDFLAGS)
 
-clean:
+clean: cleanlibs
 	$(RM) $(OBJS)
 
-fclean: clean
+cleanlibs:
+	@make -C lib clean
+
+fclean: clean fcleanlibs
 	$(RM) $(NAME)
+
+fcleanlibs:
+	@make -C lib fclean
+
+libs:
+	@make -C lib
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean cleanlibs fclean fcleanlibs libs re

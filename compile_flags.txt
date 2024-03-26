@@ -1,4 +1,6 @@
 -I
-./include/      
+./include/
+-I
+./lib/llist
 -Wall
 -Wextra

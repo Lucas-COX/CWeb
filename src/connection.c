@@ -10,7 +10,7 @@
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  LUCAS COX (), 
+ *         Author:  LUCAS COX (),
  *   Organization:  
  *
  * =====================================================================================
@@ -20,6 +20,7 @@
 
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -44,9 +45,14 @@ void display_connection_info(my_client_t client)
     char addr[INET_ADDRSTRLEN];
 
     inet_ntop(AF_INET, &(client.conn.addr), addr, INET_ADDRSTRLEN);
-    printf("Received connection from %s\n", addr);
+    printf("Received connection from %s.\n", addr);
 }
 
+/**
+ * @brief Create an empty connection
+ *
+ * @return The created connection
+ */
 my_connection_t init_connection(void)
 {
     my_connection_t conn;
@@ -57,6 +63,14 @@ my_connection_t init_connection(void)
 
 int handle_connection(my_server_t *server, my_client_t *client)
 {
+    FILE *file = fdopen(client->conn.fd, "w");
+    char addr[INET_ADDRSTRLEN];
+
+    inet_ntop(AF_INET, &(client->conn.addr), addr, INET_ADDRSTRLEN);
+    fprintf(file, "You are %s, connected on socket %d.\n", addr, client->conn.fd);
+    fflush(file);
+    display_connection_info(*client);
+    fclose(file);
     return 0;
 }
 
@@ -66,22 +80,23 @@ int handle_connection(my_server_t *server, my_client_t *client)
  * @param[my_server_t *] server the server to handle connections of
  * @return -1 on error, 0 otherwise
  */
-int accept_connections(my_server_t *server)
+my_client_t *accept_connections(my_server_t *server)
 {
-    my_client_t client = init_client();
-    pid_t pid = PARENT_PID;
+    my_client_t *client = init_client();
+    socklen_t len = 0;
 
-    client.conn.fd = accept(server->conn.fd, (struct sockaddr *)&(client.conn.addr), NULL);
-    pid = fork();
-    switch (pid) {
-    case -1:
-        perror("fork");
-        return -1;
-    case 0:
-        display_connection_info(client);
-        return close(client.conn.fd);
-    default:
-        server->clients.
-        return 0;
+    client->conn.fd = accept(server->conn.fd, (struct sockaddr *)&(client->conn.addr), &len);
+    if (client->conn.fd < 0) {
+        perror("accept");
+        free(client);
+        return NULL;
     }
+    client->pid = fork();
+    if (client->pid < 0) {
+        perror("fork");
+        free(client);
+        return NULL;
+    }
+    llist_push(server->clients, client);
+    return client;
 }

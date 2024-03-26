@@ -10,11 +10,13 @@
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  LUCAS COX (), 
+ *         Author:  LUCAS COX (),
  *   Organization:  
  *
  * =====================================================================================
  */
+
+#include <my_server.h>
 
 #include <signal.h>
 #include <stdio.h>
@@ -26,9 +28,9 @@ extern int exited;
  *
  * @param[int] sig signal type
  */
-void handle_sigint(int sig)
+void handle_sigint(UNUSED int sig)
 {
-    printf("Received sigint, exiting properly...");
+    printf("Received sigint, exiting properly...\n");
     exited = 1;
 }
 
@@ -44,5 +46,9 @@ int setup_signal_handling()
     sa.sa_handler = handle_sigint;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_SIGINFO;
-    return sigaction(SIGINT, &sa, NULL);
+    if (sigaction(SIGINT, &sa, NULL) < 0) {
+        perror("sigaction");
+        return -1;
+    }
+    return 0;
 }

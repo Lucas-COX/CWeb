@@ -10,7 +10,7 @@
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  LUCAS COX (), 
+ *         Author:  LUCAS COX (),
  *   Organization:  
  *
  * =====================================================================================
@@ -22,8 +22,12 @@
 #include <sys/socket.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <wait.h>
+
+bool exited = false;
 
 /**
  * @brief Binds the server to an address and a port and starts
@@ -69,11 +73,11 @@ int cleanup_server(my_server_t *server)
 {
     if (!server)
         return 0;
-    if (close(server->conn.fd) < 0) {
+    if (server->conn.fd != CLOSED_FD && close(server->conn.fd) < 0) {
         perror("close failed");
         return 1;
     }
-    // TODO destroy all connections
+    llist_destroy(server->clients);
     free(server);
     return 0;
 }
@@ -88,7 +92,31 @@ my_server_t *init_server(void)
 {
     my_server_t *server = malloc(sizeof(my_server_t));
 
+    memset(server, 0, sizeof(my_server_t));
     reset_connection(&(server->conn));
-    server->clients = NULL;
+    server->clients = llist_init();
     return server;
+}
+
+int run_server(my_server_t *server)
+{
+    my_client_t *client;
+    int status = 0;
+
+    while (!exited) {
+        client = accept_connections(server);
+        if (!client) {
+            break;
+        }
+        if (client->pid == CHILD_PID) {
+            handle_connection(server, client);
+            llist_remove_by_p(server->clients, (void *)client);
+            free(client);
+            exit(0);
+        } else {
+            printf("Server has %d connections.\n", server->clients->n_elem);
+        }
+    }
+    while (wait(&status) > 0);
+    return 0;
 }

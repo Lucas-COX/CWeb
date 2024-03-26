@@ -10,7 +10,7 @@
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  LUCAS COX (), 
+ *         Author:  LUCAS COX (),
  *   Organization:  
  *
  * =====================================================================================
@@ -22,8 +22,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-
-int exited = 0;
 
 /**
  * @brief Displays server info when it starts
@@ -49,12 +47,12 @@ int main(void)
     }
     display_server_info(server);
     if (setup_signal_handling() < 0) {
-        perror("failed to setup signal handling");
         cleanup_server(server);
         return EXIT_FAILURE;
     }
-    while (!exited) {
-        accept_connections(server);
+    if (run_server(server) < 0) {
+        cleanup_server(server);
+        return EXIT_FAILURE;
     }
     cleanup_server(server);
     return 0;
