@@ -26,6 +26,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+/**
+ * @brief Resets a connection object
+ *
+ * @param[my_connection_t *] conn Pointer to the connection to reset
+ */
 void reset_connection(my_connection_t *conn)
 {
     if (conn->fd != CLOSED_FD) {
@@ -61,6 +66,13 @@ my_connection_t init_connection(void)
     return conn;
 }
 
+/**
+ * @brief Handles the connection request and sends back the response
+ *
+ * @param[my_server_t *] server Server instance
+ * @param[my_client_t *] client Client that sent the request
+ * @return -1 on error, 0 otherwise
+ */
 int handle_connection(my_server_t *server, my_client_t *client)
 {
     FILE *file = fdopen(client->conn.fd, "w");

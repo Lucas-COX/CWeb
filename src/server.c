@@ -98,6 +98,12 @@ my_server_t *init_server(void)
     return server;
 }
 
+/**
+ * @brief Runs the main server process
+ *
+ * @param[my_server_t *] server Server instance
+ * @return -1 on error, 0 otherwise
+ */
 int run_server(my_server_t *server)
 {
     my_client_t *client;
