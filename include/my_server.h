@@ -20,6 +20,7 @@
 #define MY_SERVER_H
 
 #include <llist/llist.h>
+#include <requests/requests.h>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>

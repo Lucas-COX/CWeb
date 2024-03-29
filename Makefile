@@ -20,6 +20,7 @@ CFLAGS += -g3
 LDFLAGS += -Wl,-rpath=./lib/
 LDFLAGS += -L./lib/
 LDFLAGS += -lllist
+LDFLAGS += -lrequests
 
 all: libs $(NAME)
 

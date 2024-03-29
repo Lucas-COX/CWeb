@@ -75,14 +75,15 @@ my_connection_t init_connection(void)
  */
 int handle_connection(my_server_t *server, my_client_t *client)
 {
-    FILE *file = fdopen(client->conn.fd, "w");
+    FILE *out_file = fdopen(client->conn.fd, "w");
     char addr[INET_ADDRSTRLEN];
 
+    request_read(client->conn.fd);
     inet_ntop(AF_INET, &(client->conn.addr), addr, INET_ADDRSTRLEN);
-    fprintf(file, "You are %s, connected on socket %d.\n", addr, client->conn.fd);
-    fflush(file);
+    fprintf(out_file, "You are %s, connected on socket %d.\n", addr, client->conn.fd);
+    fflush(out_file);
     display_connection_info(*client);
-    fclose(file);
+    fclose(out_file);
     return 0;
 }
 
