@@ -20,11 +20,27 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 request_t *request_read(int fd)
 {
-    char data[MAX_REQUEST_SIZE];
+    char *data = malloc(MAX_LINE_SIZE);
+    size_t len = MAX_LINE_SIZE;
+    ssize_t n_read = 0;
+    FILE *file = fdopen(fd, "r");
+    request_t *request = request_init();
 
-    printf("Max request size is %d\n", MAX_REQUEST_SIZE);
-    return NULL;
+    while ((n_read = getline(&data, &len, file)) != -1) {
+        if (!strcmp(data, "\r\n")) {
+            break;
+        }
+        if (request_parse(request, data, n_read) < 0) {
+            printf("An error occured.\n");
+            break;
+        }
+    }
+    free(data);
+    fclose(file);
+    return request;
 }
