@@ -19,6 +19,7 @@
 #include <map.h>
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 char *map_get(map_t *map, char const *key)
@@ -32,9 +33,10 @@ char *map_get(map_t *map, char const *key)
 int map_insert(map_t *map, char const *key, char const *value)
 {
     map->keys = realloc(map->keys, (map->len + 1) * sizeof(char *));
-    map->values = realloc(map->keys, (map->len + 1) * sizeof(char *));
-    *(map->keys + map->len * sizeof(char *)) = strdup(key);
-    *(map->values + map->len * sizeof(char *)) = strdup(value);
+    map->values = realloc(map->values, (map->len + 1) * sizeof(char *));
+    map->keys[map->len] = strdup(key);
+    map->values[map->len] = strdup(value);
+    map->len++;
     return 0;
 }
 
