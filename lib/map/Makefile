@@ -4,8 +4,7 @@ CC	= gcc
 
 RM	= rm -f
 
-SRCS	= ./map.c \
-		  ./llist_node.c
+SRCS	= ./map.c
 
 OBJS	= $(SRCS:.c=.o)
 

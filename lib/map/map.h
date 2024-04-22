@@ -33,4 +33,9 @@ struct map  {
     uint16_t len;
 };
 
+map_t *map_init(void);
+char *map_get(map_t *map, char const *key);
+int map_insert(map_t *map, char const *key, char const *value);
+void map_destroy(map_t *map);
+
 #endif /* MAP_H_ */
