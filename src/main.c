@@ -33,8 +33,8 @@ void display_server_info(my_server_t *server)
 {
     char addr[INET_ADDRSTRLEN];
 
-    inet_ntop(AF_INET, &(server->conn.addr.sin_addr), addr, INET_ADDRSTRLEN);
-    printf("Running on %s:%d\n", addr, ntohs(server->conn.addr.sin_port));
+    inet_ntop(AF_INET, &(server->conn->addr.sin_addr), addr, INET_ADDRSTRLEN);
+    printf("Running on %s:%d\n", addr, ntohs(server->conn->addr.sin_port));
     printf("Accepting connections.\n");
 }
 

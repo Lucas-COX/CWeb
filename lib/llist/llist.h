@@ -20,6 +20,7 @@ struct llist {
 
 void llist_destroy(llist_t *list);
 llist_t *llist_init(void);
+void *llist_get(llist_t *list, int i);
 void llist_push(llist_t *list, void *p);
 void *llist_pop(llist_t *list);
 void *llist_remove_by_p(llist_t *list, void *p);

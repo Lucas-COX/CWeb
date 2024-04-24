@@ -24,6 +24,8 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 /* *********** Macros *********** */
 
@@ -36,6 +38,7 @@
 
 typedef struct my_client my_client_t;
 typedef struct my_connection my_connection_t;
+typedef struct my_handler_context my_handler_context_t;
 typedef struct my_server my_server_t;
 
 /* *********** Connections *********** */
@@ -43,26 +46,37 @@ typedef struct my_server my_server_t;
 struct my_connection {
     struct sockaddr_in addr;
     int fd;
+    FILE *sock;
 };
 
-my_client_t *accept_connections(my_server_t *server);
 void reset_connection(my_connection_t *conn);
-my_connection_t init_connection(void);
-int handle_connection(UNUSED my_server_t *server, my_client_t *client);
+my_connection_t *init_connection(void);
+void *handle_connection(void *params);
 
 /* *********** Client *********** */
 
 struct my_client {
-    my_connection_t conn;
-    pid_t pid;
+    my_connection_t *conn;
+    pthread_t thread;
+    bool completed;
 };
 
 my_client_t *init_client(void);
+my_client_t *accept_connections(my_server_t *server);
+
+/* *********** Handler *********** */
+
+struct my_handler_context {
+    request_t *req;
+    char *res; // TODO replace this by a response library
+    my_client_t *client;
+    my_server_t *server;
+};
 
 /* *********** Server *********** */
 
 struct my_server {
-    my_connection_t conn;
+    my_connection_t *conn;
     llist_t *clients;
 };
 

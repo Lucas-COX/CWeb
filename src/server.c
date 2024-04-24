@@ -19,11 +19,10 @@
 #include <my_server.h>
 
 #include <arpa/inet.h>
-#include <sys/socket.h>
-#include <signal.h>
+#include <pthread.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #include <wait.h>
 
@@ -41,21 +40,20 @@ bool exited = false;
 int bind_and_listen(my_server_t *server, int port, char const *ip)
 {
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    my_connection_t conn;
+    my_connection_t *conn = init_connection();
 
     if (socket_fd < 0) {
         perror("socket failed");
         return 1;
     }
-    conn.addr.sin_family = AF_INET;
-    conn.addr.sin_port = htons(port);
-    inet_pton(AF_INET, ip, &(conn.addr.sin_addr));
-    conn.fd = socket_fd;
-    if (bind(conn.fd, (struct sockaddr *)&(conn.addr), sizeof(conn.addr)) < 0) {
+    conn->addr.sin_port = htons(port);
+    inet_pton(AF_INET, ip, &(conn->addr.sin_addr));
+    conn->fd = socket_fd;
+    if (bind(conn->fd, (struct sockaddr *)&(conn->addr), sizeof(conn->addr)) < 0) {
         perror("bind failed");
         return 1;
     }
-    if (listen(conn.fd, 10) < 0) {
+    if (listen(conn->fd, 10) < 0) {
         perror("listen failed");
         return 1;
     }
@@ -73,7 +71,7 @@ int cleanup_server(my_server_t *server)
 {
     if (!server)
         return 0;
-    if (server->conn.fd != CLOSED_FD && close(server->conn.fd) < 0) {
+    if (server->conn->fd != CLOSED_FD && close(server->conn->fd) < 0) {
         perror("close failed");
         return 1;
     }
@@ -92,8 +90,7 @@ my_server_t *init_server(void)
 {
     my_server_t *server = malloc(sizeof(my_server_t));
 
-    memset(server, 0, sizeof(my_server_t));
-    reset_connection(&(server->conn));
+    server->conn = init_connection();
     server->clients = llist_init();
     return server;
 }
@@ -107,22 +104,20 @@ my_server_t *init_server(void)
 int run_server(my_server_t *server)
 {
     my_client_t *client;
-    int status = 0;
 
     while (!exited) {
         client = accept_connections(server);
-        if (!client) {
+        if (!client)
             break;
-        }
-        if (client->pid == CHILD_PID) {
-            handle_connection(server, client);
-            llist_remove_by_p(server->clients, (void *)client);
-            free(client);
-            exit(0);
-        } else {
-            printf("Server has %d connections.\n", server->clients->n_elem);
-        }
+        llist_push(server->clients, client);
+        printf("Server has %d connections.\n", server->clients->n_elem);
     }
-    while (wait(&status) > 0);
+    for (int i = 0; i < server->clients->n_elem; i++) {
+        my_client_t *client = llist_get(server->clients, i);
+        if (!client)
+            continue;
+        pthread_join(client->thread, NULL);
+        printf("Ended a thread.\n");
+    }
     return 0;
 }

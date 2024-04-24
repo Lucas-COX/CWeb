@@ -55,6 +55,22 @@ llist_t *llist_init(void)
 }
 
 /**
+ * @brief Returns the element at the given index
+ *
+ * @param[llist_t *] list First node of the list
+ * @param[int] i Index of the element to search for
+ *
+ * @return The found element, or NULL
+ */
+void *llist_get(llist_t *list, int i)
+{
+    llist_node_t *head = list->head;
+
+    for (int n = 0; n < list->n_elem && n < i; n++, head = head->next);
+    return head ? head->p : NULL;
+}
+
+/**
  * @brief Adds an element at the end of the list
  *
  * @param[llist_t *] list The list to add the element to
@@ -118,6 +134,7 @@ void *llist_remove_by_p(llist_t *list, void *p)
         list->head = node->next;
         value = node->p;
         free(node);
+        list->n_elem--;
         return value;
     }
     for (; node->next && node->next->p != p; node = node->next);
@@ -126,6 +143,7 @@ void *llist_remove_by_p(llist_t *list, void *p)
         next = node->next;
         node->next = node->next->next;
         free(next);
+        list->n_elem--;
     }
     return value;
 }

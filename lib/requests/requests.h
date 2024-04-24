@@ -4,6 +4,7 @@
 #include <map/map.h>
 
 #include <stdint.h>
+#include <stdio.h>
 #include <unistd.h>
 
 /* *********** Macros *********** */
@@ -31,7 +32,7 @@ struct request {
 
 void request_free(request_t *request);
 request_t *request_init(void);
-request_t *request_read(int fd);
+int request_receive(request_t *request, FILE *sock);
 
 /* *********** Parse *********** */
 

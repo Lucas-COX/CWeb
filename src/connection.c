@@ -19,6 +19,7 @@
 #include <my_server.h>
 
 #include <netinet/in.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,13 +32,14 @@
  *
  * @param[my_connection_t *] conn Pointer to the connection to reset
  */
-void reset_connection(my_connection_t *conn)
+void my_connection_free(my_connection_t *conn)
 {
+    if (!conn)
+        return;
     if (conn->fd != CLOSED_FD) {
         close(conn->fd);
     }
-    memset(conn, 0, sizeof(my_connection_t));
-    conn->fd = CLOSED_FD;
+    free(conn);
 }
 
 /**
@@ -45,11 +47,11 @@ void reset_connection(my_connection_t *conn)
  *
  * @param[struct sockaddr_in] in_addr the address of the current client
  */
-void display_connection_info(my_client_t client, request_t *request)
+void display_connection_info(my_client_t *client, request_t *request)
 {
     char addr[INET_ADDRSTRLEN];
 
-    inet_ntop(AF_INET, &(client.conn.addr), addr, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, &(client->conn->addr), addr, INET_ADDRSTRLEN);
     printf("Received connection from %s.\n", addr);
     printf("Sent a %d request on %s.\n", request->method, request->route);
     for (int i = 0; i < request->attributes->len; i++)
@@ -61,59 +63,32 @@ void display_connection_info(my_client_t client, request_t *request)
  *
  * @return The created connection
  */
-my_connection_t init_connection(void)
+my_connection_t *init_connection(void)
 {
-    my_connection_t conn;
+    my_connection_t *conn = malloc(sizeof(my_connection_t));
 
-    reset_connection(&conn);
+    memset(conn, 0, sizeof(my_connection_t));
+    conn->addr.sin_family = AF_INET;
+    conn->fd = CLOSED_FD;
     return conn;
 }
 
 /**
- * @brief Handles the connection request and sends back the response
+ * @brief Handles the connection request and sends back the response,
+ * by calling the corresponding handler.
  *
- * @param[my_server_t *] server Server instance
- * @param[my_client_t *] client Client that sent the request
- * @return -1 on error, 0 otherwise
+ * @param[my_handler_context_t *] ctx All information about the request, client, server
+ * and response
+ * @return NULL
  */
-int handle_connection(my_server_t *server, my_client_t *client)
+void *handle_connection(void *threadargs)
 {
-    FILE *out_file = fdopen(client->conn.fd, "w");
-    char addr[INET_ADDRSTRLEN];
-    request_t *request = request_read(client->conn.fd);
-    
-    inet_ntop(AF_INET, &(client->conn.addr), addr, INET_ADDRSTRLEN);
-    fprintf(out_file, "You are %s, connected on socket %d.\n", addr, client->conn.fd);
-    fflush(out_file);
-    display_connection_info(*client, request);
-    fclose(out_file);
-    request_free(request);
-    return 0;
+    my_handler_context_t *ctx = threadargs;
+    int status = request_receive(ctx->req, ctx->client->conn->sock);
+   
+    if (status < 0)
+        exit(1);
+    display_connection_info(ctx->client, ctx->req);
+    return NULL;
 }
 
-/**
- * @brief Handles upcoming connections to the server
- *
- * @param[my_server_t *] server the server to handle connections of
- * @return -1 on error, 0 otherwise
- */
-my_client_t *accept_connections(my_server_t *server)
-{
-    my_client_t *client = init_client();
-    socklen_t len = 0;
-
-    client->conn.fd = accept(server->conn.fd, (struct sockaddr *)&(client->conn.addr), &len);
-    if (client->conn.fd < 0) {
-        perror("accept");
-        free(client);
-        return NULL;
-    }
-    client->pid = fork();
-    if (client->pid < 0) {
-        perror("fork");
-        free(client);
-        return NULL;
-    }
-    llist_push(server->clients, client);
-    return client;
-}

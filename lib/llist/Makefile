@@ -10,7 +10,7 @@ SRCS	= ./llist.c \
 OBJS	= $(SRCS:.c=.o)
 
 CFLAGS = -I ./
-CFLAGS += -Wall -Wextra
+CFLAGS += -Wall -Wextra -g3
 CFLAGS += -fPIC
 
 LDFLAGS += -shared

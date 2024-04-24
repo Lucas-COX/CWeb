@@ -60,6 +60,7 @@ map_t *map_init(void)
 
     map->keys = NULL;
     map->values = NULL;
+    map->len = 0;
     return map;
 }
 

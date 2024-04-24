@@ -23,15 +23,13 @@
 #include <string.h>
 #include <unistd.h>
 
-request_t *request_read(int fd)
+int request_receive(request_t *request, FILE *sock)
 {
     char *data = malloc(MAX_LINE_SIZE);
     size_t len = MAX_LINE_SIZE;
     ssize_t n_read = 0;
-    FILE *file = fdopen(fd, "r");
-    request_t *request = request_init();
 
-    while ((n_read = getline(&data, &len, file)) != -1) {
+    while (sock && (n_read = getline(&data, &len, sock)) != -1) {
         if (!strcmp(data, "\r\n")) {
             break;
         }
@@ -41,6 +39,5 @@ request_t *request_read(int fd)
         }
     }
     free(data);
-    fclose(file);
-    return request;
+    return 0;
 }
