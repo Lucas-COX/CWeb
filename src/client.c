@@ -34,13 +34,11 @@ my_client_t *my_client_init(void)
     my_client_t *client = malloc(sizeof(my_client_t));
 
     client->conn = my_connection_init();
-    memset(&(client->thread), 0, sizeof(pthread_t));
     return client;
 }
 
 void my_client_destroy(my_client_t *client)
 {
-    printf("Destroying client.\n");
     if (!client) 
         return;
     if (client->conn)
@@ -72,6 +70,7 @@ my_client_t *accept_connections(my_server_t *server)
     ctx->server = server;
     ctx->req = request_init();
     // TODO init response
-    pthread_create(&client->thread, NULL, handle_connection, ctx);
+    pthread_create(&client->thread, NULL,\
+            handle_connection, ctx);
     return client;
 }

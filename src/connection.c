@@ -50,11 +50,8 @@ void my_connection_destroy(my_connection_t *conn)
  */
 void display_connection_info(my_client_t *client, request_t *request)
 {
-    char addr[INET_ADDRSTRLEN];
-
-    inet_ntop(AF_INET, &(client->conn->addr), addr, INET_ADDRSTRLEN);
-    printf("Received connection from %s.\n", addr);
-    printf("Sent a %d request on %s.\n", request->method, request->route);
+    char const *host = map_get(request->attributes, "Host");
+    printf("Received a %d request from %s on %s.\n", request->method, host, request->route);
     for (int i = 0; i < request->attributes->len; i++)
         printf("{'%s': '%s'}\n", request->attributes->keys[i], request->attributes->values[i]);
 }
@@ -68,7 +65,7 @@ my_connection_t *my_connection_init(void)
 {
     my_connection_t *conn = malloc(sizeof(my_connection_t));
 
-    memset(conn, 0, sizeof(my_connection_t));
+    memset(&(conn->addr), 0, sizeof(struct sockaddr_in));
     conn->addr.sin_family = AF_INET;
     conn->fd = CLOSED_FD;
     return conn;
@@ -95,4 +92,3 @@ void *handle_connection(void *threadargs)
     free(ctx);
     return NULL;
 }
-

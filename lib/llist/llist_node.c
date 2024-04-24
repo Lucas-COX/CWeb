@@ -42,7 +42,6 @@ void llist_node_destroy(llist_node_t *node)
  */
 void llist_node_destroyf(llist_node_t *node, llist_node_destructor f)
 {
-    printf("Using destroyf.\n");
     if (node && node->p)
         f(node->p);
     if (node)

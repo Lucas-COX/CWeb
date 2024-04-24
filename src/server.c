@@ -119,7 +119,6 @@ int run_server(my_server_t *server)
         if (!client)
             continue;
         pthread_join(client->thread, NULL);
-        printf("Ended a thread.\n");
     }
     return 0;
 }
