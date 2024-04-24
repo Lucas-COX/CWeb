@@ -45,12 +45,15 @@ void reset_connection(my_connection_t *conn)
  *
  * @param[struct sockaddr_in] in_addr the address of the current client
  */
-void display_connection_info(my_client_t client)
+void display_connection_info(my_client_t client, request_t *request)
 {
     char addr[INET_ADDRSTRLEN];
 
     inet_ntop(AF_INET, &(client.conn.addr), addr, INET_ADDRSTRLEN);
     printf("Received connection from %s.\n", addr);
+    printf("Sent a %d request on %s.\n", request->method, request->route);
+    for (int i = 0; i < request->attributes->len; i++)
+        printf("{'%s': '%s'}\n", request->attributes->keys[i], request->attributes->values[i]);
 }
 
 /**
@@ -77,13 +80,14 @@ int handle_connection(my_server_t *server, my_client_t *client)
 {
     FILE *out_file = fdopen(client->conn.fd, "w");
     char addr[INET_ADDRSTRLEN];
-
-    request_read(client->conn.fd);
+    request_t *request = request_read(client->conn.fd);
+    
     inet_ntop(AF_INET, &(client->conn.addr), addr, INET_ADDRSTRLEN);
     fprintf(out_file, "You are %s, connected on socket %d.\n", addr, client->conn.fd);
     fflush(out_file);
-    display_connection_info(*client);
+    display_connection_info(*client, request);
     fclose(out_file);
+    request_free(request);
     return 0;
 }
 
