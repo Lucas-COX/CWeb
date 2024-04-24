@@ -16,6 +16,7 @@
  * =====================================================================================
  */
 
+#include <my_config.h>
 #include <my_server.h>
 
 #include <arpa/inet.h>
@@ -37,11 +38,12 @@ void display_server_info(my_server_t *server)
     printf("Accepting connections.\n");
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
     my_server_t *server = init_server();
+    my_config_t *config = my_config_parse(argc, argv);
 
-    if (bind_and_listen(server, 8080, "127.0.0.1")) {
+    if (bind_and_listen(server, config->port, "127.0.0.1")) {
         cleanup_server(server);
         return EXIT_FAILURE;
     }
@@ -55,5 +57,7 @@ int main(void)
         return EXIT_FAILURE;
     }
     cleanup_server(server);
+    if (config)
+        free(config);
     return 0;
 }

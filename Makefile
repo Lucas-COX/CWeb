@@ -4,8 +4,9 @@ CC	= gcc
 
 RM	= rm -f
 
-SRCS	= ./src/connection.c \
-		  ./src/client.c \
+SRCS	= ./src/client.c \
+		  ./src/config.c \
+		  ./src/connection.c \
 		  ./src/main.c \
 		  ./src/server.c \
 		  ./src/signal.c
@@ -21,6 +22,7 @@ LDFLAGS += -Wl,-rpath=./lib/
 LDFLAGS += -L./lib/
 LDFLAGS += -lllist
 LDFLAGS += -lrequests
+LDFLAGS += -lmap
 
 all: libs $(NAME)
 
