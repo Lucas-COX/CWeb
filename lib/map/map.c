@@ -52,6 +52,7 @@ void map_destroy(map_t *map)
         free(map->keys);
     if (map->values)
         free(map->values);
+    free(map);
 }
 
 map_t *map_init(void)

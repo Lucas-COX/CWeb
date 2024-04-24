@@ -30,7 +30,7 @@ struct request {
     map_t *attributes;
 };
 
-void request_free(request_t *request);
+void request_destroy(request_t *request);
 request_t *request_init(void);
 int request_receive(request_t *request, FILE *sock);
 

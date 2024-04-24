@@ -16,6 +16,7 @@
  * =====================================================================================
  */
 
+#include "llist/llist.h"
 #include <my_server.h>
 
 #include <arpa/inet.h>
@@ -40,24 +41,23 @@ bool exited = false;
 int bind_and_listen(my_server_t *server, int port, char const *ip)
 {
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    my_connection_t *conn = init_connection();
 
     if (socket_fd < 0) {
         perror("socket failed");
         return 1;
     }
-    conn->addr.sin_port = htons(port);
-    inet_pton(AF_INET, ip, &(conn->addr.sin_addr));
-    conn->fd = socket_fd;
-    if (bind(conn->fd, (struct sockaddr *)&(conn->addr), sizeof(conn->addr)) < 0) {
+    server->conn->addr.sin_port = htons(port);
+    inet_pton(AF_INET, ip, &(server->conn->addr.sin_addr));
+    server->conn->fd = socket_fd;
+    if (bind(server->conn->fd, (struct sockaddr *)&(server->conn->addr),\
+                sizeof(server->conn->addr)) < 0) {
         perror("bind failed");
         return 1;
     }
-    if (listen(conn->fd, 10) < 0) {
+    if (listen(server->conn->fd, 10) < 0) {
         perror("listen failed");
         return 1;
     }
-    server->conn = conn;
     return 0;
 }
 
@@ -67,7 +67,7 @@ int bind_and_listen(my_server_t *server, int port, char const *ip)
  * @param[my_server_t *] server the server to clean up
  * @return -1 on error, 0 on success
  */
-int cleanup_server(my_server_t *server)
+int my_server_destroy(my_server_t *server)
 {
     if (!server)
         return 0;
@@ -75,6 +75,7 @@ int cleanup_server(my_server_t *server)
         perror("close failed");
         return 1;
     }
+    my_connection_destroy(server->conn);
     llist_destroy(server->clients);
     free(server);
     return 0;
@@ -90,8 +91,9 @@ my_server_t *init_server(void)
 {
     my_server_t *server = malloc(sizeof(my_server_t));
 
-    server->conn = init_connection();
+    server->conn = my_connection_init();
     server->clients = llist_init();
+    server->clients->destr = (llist_node_destructor)&my_client_destroy;
     return server;
 }
 

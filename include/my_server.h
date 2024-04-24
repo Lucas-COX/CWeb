@@ -49,8 +49,8 @@ struct my_connection {
     FILE *sock;
 };
 
-void reset_connection(my_connection_t *conn);
-my_connection_t *init_connection(void);
+void my_connection_destroy(my_connection_t *conn);
+my_connection_t *my_connection_init(void);
 void *handle_connection(void *params);
 
 /* *********** Client *********** */
@@ -61,7 +61,7 @@ struct my_client {
     bool completed;
 };
 
-my_client_t *init_client(void);
+void my_client_destroy(my_client_t *client);
 my_client_t *accept_connections(my_server_t *server);
 
 /* *********** Handler *********** */
@@ -80,7 +80,7 @@ struct my_server {
     llist_t *clients;
 };
 
-int cleanup_server(my_server_t *server);
+int my_server_destroy(my_server_t *server);
 int bind_and_listen(my_server_t *server, int port, char const *ip);
 int run_server(my_server_t *server);
 my_server_t *init_server(void);

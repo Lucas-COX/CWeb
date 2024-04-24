@@ -11,11 +11,14 @@
 typedef struct llist llist_t;
 typedef struct llist_node llist_node_t;
 
+typedef void (*llist_node_destructor)(void *p);
+
 /* *********** Llist ************ */
 
 struct llist {
     u_int16_t n_elem;
     llist_node_t *head;
+    llist_node_destructor destr;
 };
 
 void llist_destroy(llist_t *list);
@@ -33,6 +36,7 @@ struct llist_node {
 };
 
 void llist_node_destroy(llist_node_t *node);
+void llist_node_destroyf(llist_node_t *node, llist_node_destructor f);
 llist_node_t *llist_node_init(void *p);
 
 #endif /* LLIST_H_ */

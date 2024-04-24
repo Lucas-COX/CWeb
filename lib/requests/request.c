@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void request_free(request_t *request)
+void request_destroy(request_t *request)
 {
     if (!request)
         return;

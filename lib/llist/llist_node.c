@@ -19,6 +19,7 @@
 #include <llist.h>
 
 #include <stdlib.h>
+#include <stdio.h>
 
 /**
  * @brief Destroy a node and the pointer it contains
@@ -29,6 +30,21 @@ void llist_node_destroy(llist_node_t *node)
 {
     if (node && node->p)
         free(node->p);
+    if (node)
+        free(node);
+}
+
+/**
+ * @brief Destroy a list node using a custom destructor function
+ *
+ * @param[llist_node_t] node Node to be destroyed
+ * @param[llist_node_destructor] f Custom function to destroy the node
+ */
+void llist_node_destroyf(llist_node_t *node, llist_node_destructor f)
+{
+    printf("Using destroyf.\n");
+    if (node && node->p)
+        f(node->p);
     if (node)
         free(node);
 }

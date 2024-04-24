@@ -29,13 +29,23 @@
  *
  * @return The created client
  */
-my_client_t *init_client(void)
+my_client_t *my_client_init(void)
 {
     my_client_t *client = malloc(sizeof(my_client_t));
 
-    client->conn = init_connection();
+    client->conn = my_connection_init();
     memset(&(client->thread), 0, sizeof(pthread_t));
     return client;
+}
+
+void my_client_destroy(my_client_t *client)
+{
+    printf("Destroying client.\n");
+    if (!client) 
+        return;
+    if (client->conn)
+        my_connection_destroy(client->conn);
+    free(client);
 }
 
 /**
@@ -46,11 +56,17 @@ my_client_t *init_client(void)
  */
 my_client_t *accept_connections(my_server_t *server)
 {
-    my_client_t *client = init_client();
+    my_client_t *client = my_client_init();
     socklen_t len = 0;
     my_handler_context_t *ctx = malloc(sizeof(my_handler_context_t));
 
-    client->conn->fd = accept(server->conn->fd, (struct sockaddr *)&(client->conn->addr), &len);
+    client->conn->fd = accept(server->conn->fd,\
+            (struct sockaddr *)&(client->conn->addr), &len);
+    if (client->conn->fd < 0) {
+        my_client_destroy(client);
+        free(ctx);
+        return NULL;
+    }
     client->conn->sock = fdopen(client->conn->fd, "rw");
     ctx->client = client;
     ctx->server = server;

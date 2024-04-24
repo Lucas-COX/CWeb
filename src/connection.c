@@ -32,13 +32,14 @@
  *
  * @param[my_connection_t *] conn Pointer to the connection to reset
  */
-void my_connection_free(my_connection_t *conn)
+void my_connection_destroy(my_connection_t *conn)
 {
     if (!conn)
         return;
-    if (conn->fd != CLOSED_FD) {
+    if (conn->sock)
+        fclose(conn->sock);
+    if (conn->fd != CLOSED_FD)
         close(conn->fd);
-    }
     free(conn);
 }
 
@@ -63,7 +64,7 @@ void display_connection_info(my_client_t *client, request_t *request)
  *
  * @return The created connection
  */
-my_connection_t *init_connection(void)
+my_connection_t *my_connection_init(void)
 {
     my_connection_t *conn = malloc(sizeof(my_connection_t));
 
@@ -89,6 +90,9 @@ void *handle_connection(void *threadargs)
     if (status < 0)
         exit(1);
     display_connection_info(ctx->client, ctx->req);
+    request_destroy(ctx->req);
+    // TODO response_destroy
+    free(ctx);
     return NULL;
 }
 

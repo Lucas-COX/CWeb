@@ -34,7 +34,7 @@ void llist_destroy(llist_t *list)
     while (list->head) {
         node = list->head;
         list->head = node->next;
-        llist_node_destroy(node);
+        list->destr ? llist_node_destroyf(node, list->destr) : llist_node_destroy(node);
     };
     free(list);
 }
@@ -51,6 +51,7 @@ llist_t *llist_init(void)
 
     list->head = NULL;
     list->n_elem = 0;
+    list->destr = NULL;
     return list;
 }
 
