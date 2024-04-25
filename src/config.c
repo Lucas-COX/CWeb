@@ -32,6 +32,13 @@ void my_config_cleanup(my_config_t *config)
     }
 }
 
+/**
+ * @brief Parses the command line arguments
+ *
+ * @param[int] argc Count of arguments
+ * @param[char **] argv Arguments
+ * @return A config object with the parsed arguments
+ */
 my_config_t *my_config_parse(int argc, char **argv)
 {
     my_config_t *config = malloc(sizeof(my_config_t));

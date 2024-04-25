@@ -16,7 +16,6 @@
  * =====================================================================================
  */
 
-#include "requests/requests.h"
 #include <my_server.h>
 
 #include <pthread.h>
@@ -37,6 +36,11 @@ my_client_t *my_client_init(void)
     return client;
 }
 
+/**
+ * @brief Frees a client and it's fields
+ *
+ * @param[my_client_t *] client Client to be freed
+ */
 void my_client_destroy(my_client_t *client)
 {
     if (!client) 
@@ -66,10 +70,10 @@ my_client_t *accept_connections(my_server_t *server)
         return NULL;
     }
     client->conn->sock = fdopen(client->conn->fd, "rw");
+    ctx->req = request_init();
+    ctx->res = response_init();
     ctx->client = client;
     ctx->server = server;
-    ctx->req = request_init();
-    // TODO init response
     pthread_create(&client->thread, NULL,\
             handle_connection, ctx);
     return client;
