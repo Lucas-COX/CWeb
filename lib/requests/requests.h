@@ -1,3 +1,21 @@
+/*
+ * =====================================================================================
+ *
+ *       Filename:  requests.h
+ *
+ *    Description:  HTTP Request delaration and utils
+ *
+ *        Version:  1.0
+ *        Created:  25/04/2024 13:58:18
+ *       Revision:  none
+ *       Compiler:  gcc
+ *
+ *         Author:  LUCAS COX (), 
+ *   Organization:  
+ *
+ * =====================================================================================
+ */
+
 #ifndef REQUESTS_H
 #define REQUESTS_H
 

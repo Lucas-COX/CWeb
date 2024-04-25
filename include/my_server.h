@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  my_web.h
+ *       Filename:  my_server.h
  *
  *    Description:  Type and function declarations related to my HTTP server
  *
@@ -20,6 +20,7 @@
 #define MY_SERVER_H
 
 #include <llist/llist.h>
+#include <requests/response.h>
 #include <requests/requests.h>
 
 #include <arpa/inet.h>
@@ -64,11 +65,11 @@ struct my_client {
 void my_client_destroy(my_client_t *client);
 my_client_t *accept_connections(my_server_t *server);
 
-/* *********** Handler *********** */
+/* *********** Context *********** */
 
 struct my_handler_context {
     request_t *req;
-    char *res; // TODO replace this by a response library
+    response_t *res;
     my_client_t *client;
     my_server_t *server;
 };

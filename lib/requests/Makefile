@@ -8,6 +8,7 @@ SRCS	= ./parse/attributes.c \
 		  ./parse/headline.c \
 		  ./parse/parse.c \
 		  ./receive.c \
+		  ./response.c \
 		  ./request.c
 
 OBJS	= $(SRCS:.c=.o)

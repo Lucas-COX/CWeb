@@ -88,7 +88,7 @@ void *handle_connection(void *threadargs)
         exit(1);
     display_connection_info(ctx->client, ctx->req);
     request_destroy(ctx->req);
-    // TODO response_destroy
+    response_destroy(ctx->res);
     free(ctx);
     return NULL;
 }
